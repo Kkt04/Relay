@@ -5,11 +5,13 @@ import config as C
 from llm import Ctx, gov
 from pipeline import run
 
-app = FastAPI(title="The Relay", description="Research Assistant with Resilient Pipeline")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = FastAPI(title="The Relay", description="Research Assistant with Resilient Pipeline", redirect_slashes=False)
 
 @app.get("/")
 async def home():
-    return FileResponse("web/index.html")
+    return FileResponse(os.path.join(BASE_DIR, "web", "index.html"))
 
 @app.get("/status")
 async def status():
@@ -28,8 +30,9 @@ async def status():
 
 @app.get("/questions")
 async def questions():
-    if os.path.exists("questions.json"):
-        with open("questions.json") as f:
+    qpath = os.path.join(BASE_DIR, "questions.json")
+    if os.path.exists(qpath):
+        with open(qpath, "r", encoding="utf-8") as f:
             return json.load(f)
     return []
 
@@ -93,10 +96,11 @@ async def ask(q: str, setting: str = "S2_200w_k4"):
 @app.get("/experiments")
 async def get_experiments():
     import csv, collections, math
-    if not os.path.exists("results.csv"):
+    results_path = os.path.join(BASE_DIR, "results.csv")
+    if not os.path.exists(results_path):
         return {"scenarios": {}, "retrieval": {}}
     groups = collections.defaultdict(list)
-    with open("results.csv", "r", encoding="utf-8") as f:
+    with open(results_path, "r", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             groups[r["scenario"]].append(r)
     

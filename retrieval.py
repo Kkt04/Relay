@@ -1,4 +1,5 @@
-import json, math, re, collections
+import os, json, math, re, collections
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TOK = re.compile(r"[a-z0-9]+")
 STOP = set("the a an of to in is are and or for on with what how why does do did which that this it by as be from at its their".split())
 toks = lambda s: [w for w in TOK.findall(s.lower()) if w not in STOP]
@@ -7,7 +8,10 @@ SETTINGS = {"S1_80w_k3": (80, 3, False), "S2_200w_k4": (200, 4, False), "S3_200w
 
 class Index:
     def __init__(self, size):
-        pages = json.load(open("data/pages.json")); step = max(1, int(size * 0.8)); self.chunks = []
+        pages_file = os.path.join(BASE_DIR, "data", "pages.json")
+        with open(pages_file, "r", encoding="utf-8") as f:
+            pages = json.load(f)
+        step = max(1, int(size * 0.8)); self.chunks = []
         for p in pages:
             w = p["text"].split()
             for i in range(0, max(1, len(w)), step):
