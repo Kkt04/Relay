@@ -1,0 +1,10 @@
+[
+ {"id":"q1","q":"How many attention heads does the base Transformer model use?","answerable":true,"must_any":["8","eight"],"paper":"1706.03762"},
+ {"id":"q2","q":"What BLEU score did the big Transformer reach on WMT 2014 English-to-German?","answerable":true,"must_any":["28.4"],"paper":"1706.03762"},
+ {"id":"q3","q":"How many warmup steps are used in the Transformer learning rate schedule?","answerable":true,"must_any":["4000","4,000"],"paper":"1706.03762"},
+ {"id":"q4","q":"What is the theoretical latency of Moshi?","answerable":true,"must_any":["160"],"paper":"2410.00037"},
+ {"id":"q5","q":"What frame rate does the Mimi codec in Moshi run at?","answerable":true,"must_any":["12.5"],"paper":"2410.00037"},
+ {"id":"q6","q":"What does the dynamic chunking paper propose?","answerable":true,"must_any":["chunk"],"paper":"2507.07955"},
+ {"id":"q7","q":"What accuracy does the Transformer get on ImageNet?","answerable":false,"must_any":[]},
+ {"id":"q8","q":"How many parameters does GPT-4 have?","answerable":false,"must_any":[]}
+]

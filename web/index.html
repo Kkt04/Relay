@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Relay</title>
+<style>
+:root{--bg:#0e1124;--card:#171b33;--ink:#e9ecff;--mut:#8b92bd;--acc:#6f8dff;--ok:#38d996;--warn:#ffb347;--bad:#ff6a80}
+@media(prefers-color-scheme:light){:root{--bg:#f3f5ff;--card:#fff;--ink:#1a1e3a;--mut:#666d97;--acc:#3a5bff;--ok:#10a36a;--warn:#d68000;--bad:#d5314d}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.55 system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;justify-content:center;padding:28px 16px}
+main{width:100%;max-width:820px}h1{margin:0;font-size:30px}.sub{color:var(--mut);margin:4px 0 22px}
+.card{background:var(--card);border-radius:16px;padding:18px;margin-bottom:16px}
+.row{display:flex;gap:10px}input{flex:1;padding:13px 14px;border-radius:12px;border:1px solid #8884;background:transparent;color:var(--ink);font:inherit}
+button{padding:12px 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font:inherit;cursor:pointer;transition:transform .15s}button:hover{transform:translateY(-2px)}button:focus-visible,input:focus-visible{outline:3px solid var(--warn)}
+button.g{background:transparent;color:var(--ink);border:1px solid #8886}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.chip{font-size:13px;padding:6px 12px;border-radius:99px;background:#8882;cursor:pointer;transition:.2s}.chip:hover{background:var(--acc);color:#fff}
+.pipe{display:flex;align-items:center}.node{flex:0 0 auto;text-align:center;width:80px;font-size:13px}
+.dot{width:46px;height:46px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;background:#8883;transition:.3s;font-size:19px}
+.node.active .dot{background:var(--acc);animation:pulse 1s infinite}.node.done .dot{background:var(--ok)}.node.skip{opacity:.35}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #6f8dffaa}100%{box-shadow:0 0 0 16px #6f8dff00}}
+.node small{display:block;color:var(--mut);font-size:11px;min-height:15px}
+.line{flex:1;height:3px;background:#8883;border-radius:3px;position:relative;overflow:hidden;margin-bottom:22px}
+.line.on::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:flow .8s infinite}
+@keyframes flow{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+#ans{min-height:56px;white-space:pre-wrap}#ans.typing::after{content:"\258D";color:var(--acc);animation:blink .8s infinite}@keyframes blink{50%{opacity:0}}
+.cite{display:inline-block;margin:8px 8px 0 0;padding:5px 11px;border-radius:10px;background:#8882;font-size:13px;animation:pop .35s both}@keyframes pop{from{opacity:0;transform:scale(.8)}}
+.badge{display:inline-block;font-size:12px;padding:3px 10px;border-radius:99px;margin-right:8px;color:#fff}
+.meter{height:9px;border-radius:9px;background:#8883;overflow:hidden;margin:8px 0}.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .6s,background .6s}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px}.mini div{font-size:12px;padding:8px;border-radius:10px;background:#8882;transition:.3s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><main>
+<h1>The Relay</h1><p class="sub">Ask about the three research papers. Every answer shows where it came from.</p>
+<div class="card"><div class="row"><input id="q" placeholder="Ask a question about the papers" autofocus><button onclick="ask($('q').value)">Ask</button></div>
+<div class="chips" id="chips"></div></div>
+<div class="card"><div class="pipe" id="pipe"></div></div>
+<div class="card"><div id="ans">Your answer will appear here.</div><div id="cites"></div><p id="meta"></p></div>
+<div class="card"><b>Busy-ness right now</b><div class="meter"><i id="bar"></i></div><small id="st" style="color:var(--mut)"></small>
+<div style="margin-top:12px"><button class="g" onclick="burst()">Send 6 questions at once</button></div><div class="mini" id="mini"></div></div>
+</main><script>
+const S=['understand','retrieve','decide','draft','verify'],I=['🧭','🔎','⚖️','✍️','✅'],$=id=>document.getElementById(id);
+const Q=['How many attention heads does the base Transformer use?','What is the theoretical latency of Moshi?','What does the dynamic chunking paper propose?','What accuracy does the Transformer get on ImageNet?'];
+$('chips').innerHTML=Q.map(q=>`<span class="chip" onclick="$('q').value=this.textContent;ask(this.textContent)">${q}</span>`).join('');
+$('q').addEventListener('keydown',e=>e.key=='Enter'&&ask($('q').value));
+$('pipe').innerHTML=S.map((s,i)=>`<div class="node" id="n-${s}"><div class="dot">${I[i]}</div>${s}<small></small></div>`+(i<4?`<div class="line" id="l-${i}"></div>`:'')).join('');
+function reset(){S.forEach(s=>{const n=$('n-'+s);n.className='node';n.querySelector('small').textContent=''});document.querySelectorAll('.line').forEach(l=>l.className='line')}
+function stage(d){const n=$('n-'+d.name),i=S.indexOf(d.name);n.className='node '+{start:'active',done:'done',skip:'skip'}[d.state];
+ if(d.state!='start')n.querySelector('small').textContent=d.state=='skip'?'skipped':d.ms+' ms';
+ if(i>0)$('l-'+(i-1)).className='line'+(d.state=='start'?' on':'')}
+let es;
+function ask(q){if(!q.trim())return;es&&es.close();reset();$('ans').textContent='';$('ans').className='typing';$('cites').innerHTML='';$('meta').innerHTML='';
+ es=new EventSource('/ask?q='+encodeURIComponent(q));
+ es.onmessage=e=>{const m=JSON.parse(e.data);
+  if(m.t=='stage')stage(m.d);if(m.t=='token')$('ans').textContent+=m.d;if(m.t=='replace')$('ans').textContent=m.d;
+  if(m.t=='final'){es.close();final(m.d)}};
+ es.onerror=()=>{es.close();$('ans').className='';$('ans').textContent='Could not reach the server. Check that it is running, then ask again.'}}
+function final(r){$('ans').className='';$('ans').textContent=r.answer;
+ $('cites').innerHTML=r.citations.map((c,i)=>`<span class="cite" style="animation-delay:${i*.12}s">[${c.n}] ${c.paper}, page ${c.page}</span>`).join('');
+ const col={full:'var(--ok)',lite:'var(--warn)',quick:'var(--bad)'}[r.mode]||'var(--mut)',lab={full:'Full answer',lite:'Fast mode',quick:'Quick answer'}[r.mode]||'';
+ $('meta').innerHTML=`<span class="badge" style="background:${col}">${lab}</span><small style="color:var(--mut)">first word ${Math.round(r.first_token_ms)} ms, total ${Math.round(r.total_ms)} ms, retries ${r.retries}</small>`}
+function burst(){$('mini').innerHTML='';for(let i=0;i<6;i++){const d=document.createElement('div');d.textContent='#'+(i+1)+' waiting';$('mini').append(d);
+ const e=new EventSource('/ask?q='+encodeURIComponent(Q[i%Q.length]));
+ e.onmessage=ev=>{const m=JSON.parse(ev.data);if(m.t=='stage'&&m.d.state=='start')d.textContent='#'+(i+1)+' '+m.d.name;
+  if(m.t=='final'){e.close();d.textContent='#'+(i+1)+' '+m.d.mode+', '+Math.round(m.d.total_ms)+' ms';d.style.outline='2px solid var(--ok)'}}}}
+setInterval(async()=>{try{const s=await(await fetch('/status')).json(),p=Math.round(s.pressure*100);$('bar').style.width=p+'%';
+ $('bar').style.background=p>85?'var(--bad)':p>60?'var(--warn)':'var(--ok)';
+ $('st').textContent=`load ${p}%, queue ${s.queued}, ${s.daily?'daily quota used up':'daily quota OK'}, model: ${s.source}`}catch{}},1000);
+</script></body></html>
