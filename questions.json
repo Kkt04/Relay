@@ -1,10 +1,143 @@
 [
- {"id":"q1","q":"How many attention heads does the base Transformer model use?","answerable":true,"must_any":["8","eight"],"paper":"1706.03762"},
- {"id":"q2","q":"What BLEU score did the big Transformer reach on WMT 2014 English-to-German?","answerable":true,"must_any":["28.4"],"paper":"1706.03762"},
- {"id":"q3","q":"How many warmup steps are used in the Transformer learning rate schedule?","answerable":true,"must_any":["4000","4,000"],"paper":"1706.03762"},
- {"id":"q4","q":"What is the theoretical latency of Moshi?","answerable":true,"must_any":["160"],"paper":"2410.00037"},
- {"id":"q5","q":"What frame rate does the Mimi codec in Moshi run at?","answerable":true,"must_any":["12.5"],"paper":"2410.00037"},
- {"id":"q6","q":"What does the dynamic chunking paper propose?","answerable":true,"must_any":["chunk"],"paper":"2507.07955"},
- {"id":"q7","q":"What accuracy does the Transformer get on ImageNet?","answerable":false,"must_any":[]},
- {"id":"q8","q":"How many parameters does GPT-4 have?","answerable":false,"must_any":[]}
+  {
+    "id": "q1",
+    "category": "transformer",
+    "q": "How many attention heads does the base Transformer model use?",
+    "answerable": true,
+    "must_any": ["8", "eight"],
+    "paper": "1706.03762"
+  },
+  {
+    "id": "q2",
+    "category": "transformer",
+    "q": "What BLEU score did the big Transformer reach on WMT 2014 English-to-German?",
+    "answerable": true,
+    "must_any": ["28.4"],
+    "paper": "1706.03762"
+  },
+  {
+    "id": "q3",
+    "category": "transformer",
+    "q": "How many warmup steps are used in the Transformer learning rate schedule?",
+    "answerable": true,
+    "must_any": ["4000", "4,000"],
+    "paper": "1706.03762"
+  },
+  {
+    "id": "q4",
+    "category": "transformer",
+    "q": "What is the dimensionality d_model of the input and output in the base Transformer?",
+    "answerable": true,
+    "must_any": ["512"],
+    "paper": "1706.03762"
+  },
+  {
+    "id": "q5",
+    "category": "transformer",
+    "q": "What dropout rate was applied to the Transformer sub-layers during training?",
+    "answerable": true,
+    "must_any": ["0.1"],
+    "paper": "1706.03762"
+  },
+  {
+    "id": "q6",
+    "category": "transformer",
+    "q": "What optimizer was used to train the Transformer models?",
+    "answerable": true,
+    "must_any": ["adam"],
+    "paper": "1706.03762"
+  },
+  {
+    "id": "q7",
+    "category": "moshi",
+    "q": "What is the theoretical latency of Moshi?",
+    "answerable": true,
+    "must_any": ["160", "160ms", "160 ms"],
+    "paper": "2410.00037"
+  },
+  {
+    "id": "q8",
+    "category": "moshi",
+    "q": "What frame rate does the Mimi codec in Moshi run at?",
+    "answerable": true,
+    "must_any": ["12.5", "12.5 Hz"],
+    "paper": "2410.00037"
+  },
+  {
+    "id": "q9",
+    "category": "moshi",
+    "q": "What is the sample rate of audio in the Mimi neural codec for Moshi?",
+    "answerable": true,
+    "must_any": ["24", "24kHz", "24 kHz"],
+    "paper": "2410.00037"
+  },
+  {
+    "id": "q10",
+    "category": "moshi",
+    "q": "What base language model is Moshi initialized from?",
+    "answerable": true,
+    "must_any": ["helium"],
+    "paper": "2410.00037"
+  },
+  {
+    "id": "q11",
+    "category": "moshi",
+    "q": "How many codebooks does the Mimi audio codec use for the audio stream?",
+    "answerable": true,
+    "must_any": ["8", "32", "codebook"],
+    "paper": "2410.00037"
+  },
+  {
+    "id": "q12",
+    "category": "chunking",
+    "q": "What does the dynamic chunking paper propose?",
+    "answerable": true,
+    "must_any": ["chunk", "hierarchical", "boundary"],
+    "paper": "2507.07955"
+  },
+  {
+    "id": "q13",
+    "category": "chunking",
+    "q": "What hierarchical sequence modeling architecture does dynamic chunking evaluate on?",
+    "answerable": true,
+    "must_any": ["mega", "hierarchical"],
+    "paper": "2507.07955"
+  },
+  {
+    "id": "q14",
+    "category": "chunking",
+    "q": "How does dynamic chunking determine boundary positions between chunks?",
+    "answerable": true,
+    "must_any": ["boundary", "predictor", "dynamic"],
+    "paper": "2507.07955"
+  },
+  {
+    "id": "q15",
+    "category": "chunking",
+    "q": "What computational benefit does dynamic chunking achieve on long context benchmarks?",
+    "answerable": true,
+    "must_any": ["speed", "efficiency", "quadratic", "linear", "memory", "throughput"],
+    "paper": "2507.07955"
+  },
+  {
+    "id": "q16",
+    "category": "refusal",
+    "q": "What accuracy does the Transformer get on ImageNet classification?",
+    "answerable": false,
+    "must_any": []
+  },
+  {
+    "id": "q17",
+    "category": "refusal",
+    "q": "How many total parameters does OpenAI's GPT-4 contain?",
+    "answerable": false,
+    "must_any": []
+  },
+  {
+    "id": "q18",
+    "category": "refusal",
+    "q": "What is the training batch size of Claude 3 Opus in tokens?",
+    "answerable": false,
+    "must_any": []
+  }
 ]

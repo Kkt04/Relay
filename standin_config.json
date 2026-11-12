@@ -1,0 +1,14 @@
+{
+ "ttft_mu": 5.75,
+ "ttft_sigma": 0.42,
+ "tok_ms": 5.8,
+ "load_slow": 0.08,
+ "fail_rate": 0.01,
+ "slow_p": 0.03,
+ "slow_mult": 4.5,
+ "rpm": 30,
+ "tpm": 6000,
+ "rpd": 14400,
+ "tpd": 500000,
+ "max_inflight": 10
+}

@@ -1,0 +1,28 @@
+{
+ "headers_sample": {
+  "x-ratelimit-limit-requests": "14400",
+  "x-ratelimit-remaining-requests": "14392",
+  "x-ratelimit-reset-requests": "18h42m",
+  "x-ratelimit-limit-tokens": "6000",
+  "x-ratelimit-remaining-tokens": "5920",
+  "x-ratelimit-reset-tokens": "800ms"
+ },
+ "first_429": {
+  "body": "{\"error\":{\"message\":\"Rate limit reached for model `llama-3.1-8b-instant` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2.0s.\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+  "headers": {
+   "retry-after": "2",
+   "x-ratelimit-limit-requests": "30",
+   "x-ratelimit-remaining-requests": "0"
+  }
+ },
+ "ok_before_429": 30,
+ "recover_s": 2.1,
+ "burst_window_s": 5.4,
+ "measured_limits": {
+  "rpm": 30,
+  "tpm": 6000,
+  "rpd": 14400,
+  "tpd": 500000,
+  "max_inflight": 10
+ }
+}

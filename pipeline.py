@@ -37,7 +37,9 @@ async def run(q, setting, ctx, emit=None):
         used = sorted({int(x) for x in re.findall(r"\[(\d+)\]", ans)}) if not refused else []
         cites = [dict(n=n, paper=ps[n-1]["paper"], arxiv=ps[n-1]["arxiv"], page=ps[n-1]["page"]) for n in used if 1 <= n <= len(ps)]
         late = (time.monotonic() - ctx.t0) > ctx.patience
-        return dict(status="timeout" if late else "ok", answer=ans, refused=refused, citations=cites, mode=mode)
+        passages = [dict(n=i+1, paper=p["paper"], arxiv=p["arxiv"], page=p["page"], text=p["text"],
+                         score=round(p.get("score", 0), 2), cov=round(p.get("cov", 0), 2)) for i, p in enumerate(ps)]
+        return dict(status="timeout" if late else "ok", answer=ans, refused=refused, citations=cites, passages=passages, mode=mode)
 
     size, k, rr = SETTINGS[setting]; mode = "full"
     if gov.daily_exhausted: mode = "quick"
