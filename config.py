@@ -18,7 +18,7 @@ _load_env()
 
 BASE_URL = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
 API_KEY = os.getenv("GROQ_API_KEY", "none")
-MODEL = os.getenv("MODEL", "llama-3.1-8b-instant")
+MODEL = os.getenv("MODEL", "qwen/qwen3.8-27b")
 SOURCE = "stand-in" if ("127.0.0.1" in BASE_URL or "localhost" in BASE_URL or API_KEY == "none" or not API_KEY) else "real"
 
 f = lambda k, d: type(d)(os.getenv(k, d))
