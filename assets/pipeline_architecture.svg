@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #08090D; }
+      .panel { fill: #17191F; stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; rx: 8; }
+      .panel-active { fill: #20232C; stroke: #168BFF; stroke-width: 2; rx: 8; }
+      .panel-gate { fill: #20232C; stroke: #FF7629; stroke-width: 2; rx: 8; }
+      .text-title { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; fill: #E8EDF5; }
+      .text-sub { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 12px; fill: #858C99; }
+      .text-metric { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #168BFF; }
+      .text-gate { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FF7629; }
+      .arrow { stroke: #858C99; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-blue { stroke: #168BFF; stroke-width: 2; fill: none; marker-end: url(#arrowhead-blue); }
+      .arrow-orange { stroke: #FF7629; stroke-width: 2; fill: none; stroke-dasharray: 4,4; marker-end: url(#arrowhead-orange); }
+      .arrow-green { stroke: #39D6A0; stroke-width: 2; fill: none; marker-end: url(#arrowhead-green); }
+    </style>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#858C99" />
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#168BFF" />
+    </marker>
+    <marker id="arrowhead-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#FF7629" />
+    </marker>
+    <marker id="arrowhead-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#39D6A0" />
+    </marker>
+  </defs>
+
+  <rect width="960" height="480" class="bg" />
+
+  <!-- Title & Context -->
+  <text x="40" y="42" font-family="'Inter', sans-serif" font-size="18" font-weight="700" fill="#E8EDF5">The Relay: Multi-Stage Execution Pipeline Architecture</text>
+  <text x="40" y="64" font-family="'Inter', sans-serif" font-size="12" fill="#858C99">End-to-end request lifecycle with adaptive load shedding and grounded verification</text>
+
+  <!-- Query Input -->
+  <rect x="40" y="110" width="130" height="90" class="panel" />
+  <text x="55" y="142" class="text-title">User Query</text>
+  <text x="55" y="162" class="text-sub">arXiv question</text>
+  <text x="55" y="182" class="text-metric">Client Request</text>
+
+  <!-- Connection to Step 1 -->
+  <path d="M 170 155 L 210 155" class="arrow" />
+
+  <!-- Step 1: Understand -->
+  <rect x="210" y="110" width="130" height="90" class="panel" />
+  <text x="225" y="138" class="text-title">1. Understand</text>
+  <text x="225" y="158" class="text-sub">Query expansion</text>
+  <text x="225" y="176" class="text-metric">Model call (30 tok)</text>
+  <text x="225" y="192" class="text-sub">Shed if load &gt; 70%</text>
+
+  <!-- Connection to Step 2 -->
+  <path d="M 340 155 L 380 155" class="arrow-blue" />
+
+  <!-- Step 2: Retrieve -->
+  <rect x="380" y="110" width="130" height="90" class="panel-active" />
+  <text x="395" y="138" class="text-title">2. Retrieve</text>
+  <text x="395" y="158" class="text-sub">BM25 + TF-IDF</text>
+  <text x="395" y="176" class="text-metric">120 arXiv Pages</text>
+  <text x="395" y="192" class="text-sub">Chunk size 200w, k=4</text>
+
+  <!-- Connection to Step 3 -->
+  <path d="M 510 155 L 550 155" class="arrow-blue" />
+
+  <!-- Step 3: Decide (Branching Gate) -->
+  <rect x="550" y="110" width="130" height="90" class="panel-gate" />
+  <text x="565" y="138" class="text-title">3. Decide</text>
+  <text x="565" y="158" class="text-sub">Coverage gate</text>
+  <text x="565" y="176" class="text-gate">Cov &lt; 0.35 Refuse</text>
+  <text x="565" y="192" class="text-sub">Branching logic</text>
+
+  <!-- Branch Downward: Refusal -->
+  <path d="M 615 200 L 615 260" class="arrow-orange" />
+  <rect x="535" y="260" width="160" height="70" class="panel" stroke="#FF5364" />
+  <text x="550" y="288" class="text-title" fill="#FF5364">Safe Refusal</text>
+  <text x="550" y="308" class="text-sub">"Not in papers, won't guess"</text>
+
+  <!-- Branch Right: Proceed to Draft -->
+  <path d="M 680 155 L 720 155" class="arrow-green" />
+
+  <!-- Step 4: Draft -->
+  <rect x="720" y="110" width="130" height="90" class="panel" />
+  <text x="735" y="138" class="text-title">4. Draft</text>
+  <text x="735" y="158" class="text-sub">Streamed LLM</text>
+  <text x="735" y="176" class="text-metric">Groq LLaMA-3.1-8B</text>
+  <text x="735" y="192" class="text-sub">Speculative buffer</text>
+
+  <!-- Connection to Step 5 -->
+  <path d="M 850 155 L 890 155" class="arrow" />
+
+  <!-- Step 5: Verify Tool -->
+  <rect x="800" y="250" width="130" height="90" class="panel" />
+  <text x="815" y="278" class="text-title">5. Verify Tool</text>
+  <text x="815" y="298" class="text-sub">Independent tool</text>
+  <text x="815" y="316" class="text-metric">Check [n] citations</text>
+  <text x="815" y="332" class="text-sub">Exact quote match</text>
+
+  <!-- Retry Loop Arrow back to Draft -->
+  <path d="M 800 295 L 785 295 L 785 205" class="arrow-orange" />
+  <text x="715" y="250" font-family="'JetBrains Mono', monospace" font-size="10" fill="#FFC15A">Re-draft (max 1 loop)</text>
+
+  <!-- Verified Output Path -->
+  <path d="M 865 340 L 865 410 L 380 410" class="arrow-green" />
+  <rect x="220" y="380" width="160" height="60" class="panel" stroke="#39D6A0" />
+  <text x="235" y="405" class="text-title" fill="#39D6A0">Verified Answer</text>
+  <text x="235" y="425" class="text-sub">Grounded citations &amp; latency</text>
+
+  <!-- Governor Subsystem Panel -->
+  <rect x="40" y="240" width="300" height="110" class="panel" stroke="#168BFF" stroke-dasharray="3,3" />
+  <text x="55" y="268" class="text-title" fill="#168BFF">AIMD Client-Side Governor</text>
+  <text x="55" y="288" class="text-sub">Sliding-window RPM (30) and TPM (6,000)</text>
+  <text x="55" y="308" class="text-sub">Concurrency semaphore (max 6 in-flight)</text>
+  <text x="55" y="328" class="text-sub">Sheds to Extractive Mode when quota depleted</text>
+</svg>

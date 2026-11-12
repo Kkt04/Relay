@@ -40,8 +40,15 @@ else:
 print("🌐 Starting Web UI on http://localhost:8000 ...")
 print("Press Ctrl+C to stop the server anytime.\n")
 
+import logging
+class StatusFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "/status" not in record.getMessage()
+
+logging.getLogger("uvicorn.access").addFilter(StatusFilter())
+
 try:
-    subprocess.run([sys.executable, "-m", "uvicorn", "app:app", "--port", "8000"], env=env)
+    subprocess.run([sys.executable, "-m", "uvicorn", "app:app", "--port", "8000", "--access-log"], env=env)
 except KeyboardInterrupt:
     print("\n👋 Server stopped gracefully.")
 finally:

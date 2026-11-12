@@ -41,6 +41,11 @@ async def toggle_daily():
         gov.daily_until = time.time() + 86400
     return {"daily_exhausted": gov.daily_exhausted}
 
+@app.post("/reset-governor")
+async def reset_governor():
+    gov.reset()
+    return {"status": "ok", "stats": gov.stats()}
+
 @app.get("/ask")
 async def ask(q: str, setting: str = "S2_200w_k4"):
     box = asyncio.Queue()
@@ -84,6 +89,63 @@ async def ask(q: str, setting: str = "S2_200w_k4"):
             yield f"data: {json.dumps({'t': it[0], 'd': it[1]})}\n\n"
 
     return StreamingResponse(gen(), media_type="text/event-stream")
+
+@app.get("/experiments")
+async def get_experiments():
+    import csv, collections, math
+    if not os.path.exists("results.csv"):
+        return {"scenarios": {}, "retrieval": {}}
+    groups = collections.defaultdict(list)
+    with open("results.csv", "r", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            groups[r["scenario"]].append(r)
+    
+    def pct(v, p):
+        v = sorted(v)
+        return round(v[min(len(v) - 1, math.ceil(p / 100 * len(v)) - 1)]) if v else None
+
+    scenarios = {}
+    for s, s_rows in groups.items():
+        if s.startswith(("retrieval_", "probe")): continue
+        ft = [float(r["first_token_ms"]) for r in s_rows if r.get("first_token_ms")]
+        tot = [float(r["total_ms"]) for r in s_rows if r.get("total_ms")]
+        tin = sum(float(r.get("tokens_in") or 0) for r in s_rows) / max(len(s_rows), 1)
+        tout = sum(float(r.get("tokens_out") or 0) for r in s_rows) / max(len(s_rows), 1)
+        scenarios[s] = {
+            "source": s_rows[0]["source"],
+            "sent": len(s_rows),
+            "succeeded_pct": round(100 * sum(r["status"] == "ok" for r in s_rows) / len(s_rows), 1),
+            "rate_limited_pct": round(100 * sum(r["status"] == "rate_limited" for r in s_rows) / len(s_rows), 1),
+            "timeout_pct": round(100 * sum(r["status"] == "timeout" for r in s_rows) / len(s_rows), 1),
+            "retries_per_req": round(sum(int(r.get("retries") or 0) for r in s_rows) / len(s_rows), 2),
+            "peak_queue": max(int(r.get("queue_len") or 0) for r in s_rows),
+            "ft_p50": pct(ft, 50),
+            "ft_p95": pct(ft, 95),
+            "tot_p50": pct(tot, 50),
+            "tot_p95": pct(tot, 95),
+            "tokens_per_ans": round(tin + tout)
+        }
+
+    retrieval = {}
+    for s, s_rows in groups.items():
+        if not s.startswith("retrieval_"): continue
+        name = s[10:]
+        ft = [float(r["first_token_ms"]) for r in s_rows if r.get("first_token_ms")]
+        tot = [float(r["total_ms"]) for r in s_rows if r.get("total_ms")]
+        tin = sum(float(r.get("tokens_in") or 0) for r in s_rows) / max(len(s_rows), 1)
+        tout = sum(float(r.get("tokens_out") or 0) for r in s_rows) / max(len(s_rows), 1)
+        retrieval[name] = {
+            "asked": len(s_rows),
+            "correct_pct": round(100 * sum(r.get("answer_grade") == "correct" for r in s_rows) / len(s_rows), 1),
+            "wrong_pct": round(100 * sum(r.get("answer_grade") == "wrong" for r in s_rows) / len(s_rows), 1),
+            "refused_pct": round(100 * sum(r.get("answer_grade") == "refused_correctly" for r in s_rows) / len(s_rows), 1),
+            "tokens": round(tin + tout),
+            "ft_p50": pct(ft, 50),
+            "ft_p95": pct(ft, 95),
+            "tot_p50": pct(tot, 50),
+            "tot_p95": pct(tot, 95)
+        }
+    return {"scenarios": scenarios, "retrieval": retrieval}
 
 @app.get("/download-zip")
 async def download_zip():

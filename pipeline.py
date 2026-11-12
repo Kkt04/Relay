@@ -4,8 +4,11 @@ from llm import gov, chat, RateLimited, Transient
 from retrieval import SETTINGS, get_index, toks
 
 NOT_IN = "NOT_IN_PAPERS"
-SYS = ("You answer ONLY from the numbered passages. Cite every claim with [n]. If the passages do not contain the answer, "
-       "reply exactly: NOT_IN_PAPERS. Max 4 sentences. Never use outside knowledge.")
+SYS = ("You are an expert research assistant answering questions about arXiv research papers. "
+       "Provide a direct, descriptive, and comprehensive answer using ONLY the provided numbered passages. "
+       "Every factual statement must cite the source passage with [n]. "
+       "If the passages do not contain the answer, reply exactly: NOT_IN_PAPERS. "
+       "Keep your response within 3 to 4 clear sentences without conversational filler.")
 REFUSE = "The three papers (Attention Is All You Need, Moshi, Dynamic Chunking) don't say this, so I won't guess."
 VFAIL = "I couldn't produce an answer I could verify against the papers, so I won't guess. Try rephrasing the question."
 norm = lambda s: " ".join(re.findall(r"[a-z0-9]+", s.lower()))
@@ -21,12 +24,24 @@ async def verify_tool(ans, ps):
         if norm(qt) not in big: return False, "quote not in passages"
     return True, ""
 
-def extractive(ps, q, prefix):
+def extractive(ps, q):
     qs, best = set(toks(q)), []
-    for i, p in enumerate(ps[:2], 1):
-        for s in re.split(r"(?<=[.!?]) ", p["text"]): best.append((len(qs & set(toks(s))), i, " ".join(s.split()[:50])))
+    for i, p in enumerate(ps[:3], 1):
+        for s in re.split(r"(?<=[.!?])\s+", p["text"]):
+            s_clean = s.strip()
+            if len(s_clean.split()) >= 6:
+                best.append((len(qs & set(toks(s_clean))), i, s_clean))
     best.sort(key=lambda x: -x[0])
-    return prefix + " ".join(f"\u201c{s}\u201d [{i}]" for _, i, s in best[:2])
+    if not best:
+        return f"According to {ps[0]['paper']} (page {ps[0]['page']}), {ps[0]['text'][:280]}... [1]"
+    selected = []
+    seen = set()
+    for _, i, s in best:
+        if s not in seen:
+            seen.add(s)
+            selected.append(f"{s} [{i}]")
+            if len(selected) == 2: break
+    return " ".join(selected)
 
 async def run(q, setting, ctx, emit=None):
     async def em(t, d=None):
@@ -50,9 +65,13 @@ async def run(q, setting, ctx, emit=None):
         try:
             kw = await chat(ctx, [{"role": "user", "content": "###TASK:understand\nGive 6-10 search keywords (no sentence) for finding the answer to this question in research papers:\n" + q}], max_tokens=30)
             query = q + " " + kw
-        except RateLimited as e: mode = "quick" if e.daily else "lite"
-        except Transient: mode = "lite"
-        await st("understand", "done")
+            await st("understand", "done")
+        except RateLimited as e:
+            mode = "quick" if e.daily else "lite"
+            await st("understand", "skip", "rate-limited")
+        except Exception:
+            mode = "lite"
+            await st("understand", "skip", "lite-fallback")
     else: await st("understand", "skip")
     await st("retrieve", "start")                                   # 2 retrieve
     ps = get_index(size).search(query, k, rr, cov_q=q)
@@ -64,8 +83,7 @@ async def run(q, setting, ctx, emit=None):
     await st("decide", "done", mode)
     if mode == "quick":
         await st("draft", "skip"); await st("verify", "skip")
-        pre = "Today's AI quota is used up, so this is a quick answer taken straight from the papers (full answers return after reset): " if gov.daily_exhausted else "We're very busy, so this is a quick answer taken straight from the papers: "
-        return fin(extractive(ps, q, pre), False, ps, "quick")
+        return fin(extractive(ps, q), False, ps, "quick")
     ctxt = "\n".join(f"[{i+1}] ({p['paper']}, p.{p['page']}): {p['text']}" for i, p in enumerate(ps))
     msgs = [{"role": "system", "content": SYS}, {"role": "user", "content": f"###TASK:draft\nPassages:\n{ctxt}\n\nQuestion: {q}"}]
     buf, sent = "", 0
@@ -81,9 +99,10 @@ async def run(q, setting, ctx, emit=None):
         if attempt: await em("replace", "")
         await st("draft", "start")
         try: ans = (await chat(ctx, msgs, 200 if mode == "lite" else 300, True, on_tok)).strip()
-        except (RateLimited, Transient):
-            await st("draft", "done", "busy"); await st("verify", "skip")
-            return fin(extractive(ps, q, "We're very busy, so this is a quick answer taken straight from the papers: "), False, ps, "quick")
+        except Exception as e:
+            print(f"\n[Draft Model Call Exception]: {type(e).__name__}: {e}")
+            await st("draft", "done", "fallback"); await st("verify", "skip")
+            return fin(extractive(ps, q), False, ps, "quick")
         await st("draft", "done")
         if ans.startswith(NOT_IN): await st("verify", "skip"); return fin(REFUSE, True, ps, mode)
         await st("verify", "start")

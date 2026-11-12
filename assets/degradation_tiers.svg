@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #08090D; }
+      .tier-panel { fill: #17191F; stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; rx: 8; }
+      .text-title { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; fill: #E8EDF5; }
+      .text-sub { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 12.5px; fill: #858C99; }
+      .text-mono { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+      .badge-green { fill: #39D6A0; font-weight: 700; }
+      .badge-amber { fill: #FFC15A; font-weight: 700; }
+      .badge-blue { fill: #168BFF; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect width="960" height="360" class="bg" />
+
+  <text x="40" y="38" font-family="'Inter', sans-serif" font-size="18" font-weight="700" fill="#E8EDF5">Adaptive Load Shedding: Three Tiers of Operational Resilience</text>
+  <text x="40" y="60" font-family="'Inter', sans-serif" font-size="12" fill="#858C99">Preventing 429 rate limit errors and guaranteeing continuous availability under severe burst traffic</text>
+
+  <!-- Tier 1: Full Mode -->
+  <rect x="40" y="90" width="275" height="230" class="tier-panel" stroke="#39D6A0" />
+  <text x="60" y="122" class="text-title">Tier 1: Full Pipeline</text>
+  <text x="60" y="142" class="text-mono badge-green">NORMAL LOAD (&lt; 70%)</text>
+  <text x="60" y="172" class="text-sub">Stage 1: Keyword Expansion (LLM)</text>
+  <text x="60" y="194" class="text-sub">Stage 2: BM25 Retrieval (k=4 passages)</text>
+  <text x="60" y="216" class="text-sub">Stage 3: Coverage Gate</text>
+  <text x="60" y="238" class="text-sub">Stage 4: Full Streamed Synthesis</text>
+  <text x="60" y="260" class="text-sub">Stage 5: Citation Tool Verification</text>
+  <text x="60" y="295" class="text-mono" fill="#858C99">Latency: ~714 ms | Quality: 100%</text>
+
+  <!-- Tier 2: Fast Lite Mode -->
+  <rect x="340" y="90" width="275" height="230" class="tier-panel" stroke="#FFC15A" />
+  <text x="360" y="122" class="text-title">Tier 2: Fast Lite Mode</text>
+  <text x="360" y="142" class="text-mono badge-amber">HIGH PRESSURE (≥ 70%)</text>
+  <text x="360" y="172" class="text-sub">Stage 1: SKIPPED (saves 30 tokens)</text>
+  <text x="360" y="194" class="text-sub">Stage 2: Halved Retrieval (k=2 passages)</text>
+  <text x="360" y="216" class="text-sub">Stage 3: Coverage Gate</text>
+  <text x="360" y="238" class="text-sub">Stage 4: Concised Prompt (200 tok)</text>
+  <text x="360" y="260" class="text-sub">Stage 5: Citation Tool Verification</text>
+  <text x="360" y="295" class="text-mono" fill="#858C99">Tokens Saved: ~55% | Fast Recovery</text>
+
+  <!-- Tier 3: Quick Extractive Mode -->
+  <rect x="640" y="90" width="280" height="230" class="tier-panel" stroke="#168BFF" />
+  <text x="660" y="122" class="text-title">Tier 3: Quick Extractive</text>
+  <text x="660" y="142" class="text-mono badge-blue">DAILY QUOTA DEPLETED (3 PM)</text>
+  <text x="660" y="172" class="text-sub">Stage 1: SKIPPED (0 API tokens)</text>
+  <text x="660" y="194" class="text-sub">Stage 2: BM25 Passage Search</text>
+  <text x="660" y="216" class="text-sub">Stage 3: Coverage Verification</text>
+  <text x="660" y="238" class="text-sub">Stage 4: Verbatim Sentence Extraction</text>
+  <text x="660" y="260" class="text-sub">Stage 5: Direct Paper Page Citing</text>
+  <text x="660" y="295" class="text-mono" fill="#858C99">Latency: &lt; 130 ms | 0 API Cost</text>
+</svg>

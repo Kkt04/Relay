@@ -40,10 +40,10 @@ class Governor:
     def on_429(s, body, ra):
         low = body.lower()
         if "per day" in low or "(rpd)" in low or "(tpd)" in low: s.daily_until = time.time() + ra; return True
-        s.scale = max(0.2, s.scale * 0.7); s.streak = 0; return False
+        s.scale = max(0.4, round(s.scale * 0.75, 2)); s.streak = 0; return False
     def on_ok(s):
         s.streak += 1
-        if s.streak >= 10 and s.scale < 1: s.scale = min(1.0, s.scale * 1.1); s.streak = 0
+        if s.streak >= 2 and s.scale < 1.0: s.scale = min(1.0, round(s.scale + 0.15, 2)); s.streak = 0
     def stats(s):
         return dict(pressure=round(s.pressure(), 2), queued=s.queued, peak=s.peak, scale=round(s.scale, 2), daily=s.daily_exhausted, source=C.SOURCE)
 
@@ -71,7 +71,13 @@ async def _call(ctx, messages, max_tokens, stream, on_token):
             except ValueError: ra = 5.0
             raise RateLimited(b[:150], gov.on_429(b, ra), ra)
         if r.status_code >= 500: await r.aread(); raise Transient(str(r.status_code))
-        if r.status_code != 200: raise RuntimeError(f"{r.status_code} {(await r.aread())[:200]!r}")
+        if r.status_code in (401, 403):
+            b = (await r.aread()).decode(errors="ignore")
+            print(f"\n⚠️ Groq Authentication Error ({r.status_code}): {b[:120]}")
+            raise RateLimited("Authentication failed. Falling back to extractive mode.", False, 1.0)
+        if r.status_code != 200:
+            b = (await r.aread()).decode(errors="ignore")
+            raise Transient(f"{r.status_code} {b[:120]}")
         if not stream:
             j = json.loads(await r.aread()); out.append(j["choices"][0]["message"]["content"]); usage = j.get("usage")
         else:
